@@ -1,53 +1,57 @@
-import { createContext, useState } from 'react';
+import React, { createContext, useState } from 'react';
 
-// Crear el contexto
 export const CartContext = createContext();
 
-// Proveedor del contexto
 export const CartProvider = ({ children }) => {
     const [cartItems, setCartItems] = useState([]);
-
-    // Función para agregar un producto al carrito
-    const addToCart = (pizza) => {
-        setCartItems((prevItems) => {
-            const itemInCart = prevItems.find((item) => item.id === pizza.id);
-            if (itemInCart) {
-                return prevItems.map((item) =>
-                    item.id === pizza.id ? { ...item, quantity: item.quantity + 1 } : item
-                );
-            } else {
-                return [...prevItems, { ...pizza, quantity: 1 }];
-            }
-        });
-    };
-
-    // Función para reducir la cantidad de un producto en el carrito
-    const decreaseQuantity = (pizzaId) => {
-        setCartItems((prevItems) => {
-            return prevItems
-                .map((item) =>
-                    item.id === pizzaId
-                        ? { ...item, quantity: item.quantity > 1 ? item.quantity - 1 : 1 }
+    
+    // Agregar producto al carrito
+    const addToCart = (product) => {
+        setCartItems(prevItems => {
+            const existingItem = prevItems.find(item => item.id === product.id);
+            if (existingItem) {
+                return prevItems.map(item =>
+                    item.id === product.id
+                        ? { ...item, quantity: item.quantity + 1 }
                         : item
-                )
-                .filter(item => item.quantity > 0); // Eliminar productos con cantidad 0
+                );
+            }
+            return [...prevItems, { ...product, quantity: 1 }];
         });
     };
 
-    // Función para eliminar un producto del carrito
-    const removeFromCart = (pizzaId) => {
-        setCartItems((prevItems) =>
-            prevItems.filter((item) => item.id !== pizzaId)
+    // Incrementar cantidad
+    const increaseQuantity = (id) => {
+        setCartItems(prevItems =>
+            prevItems.map(item =>
+                item.id === id
+                    ? { ...item, quantity: item.quantity + 1 }
+                    : item
+            )
         );
     };
 
-    // Obtener el total del carrito
+    // Decrementar cantidad
+    const decreaseQuantity = (id) => {
+        setCartItems(prevItems =>
+            prevItems.map(item =>
+                item.id === id
+                    ? { ...item, quantity: Math.max(1, item.quantity - 1) }
+                    : item
+            )
+        );
+    };
+
+    // Eliminar producto
+    const removeFromCart = (id) => {
+        setCartItems(prevItems => prevItems.filter(item => item.id !== id));
+    };
+
+    // Calcular total
     const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
     return (
-        <CartContext.Provider
-            value={{ cartItems, addToCart, decreaseQuantity, removeFromCart, totalPrice }}
-        >
+        <CartContext.Provider value={{ cartItems, totalPrice, addToCart, increaseQuantity, decreaseQuantity, removeFromCart }}>
             {children}
         </CartContext.Provider>
     );

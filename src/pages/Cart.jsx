@@ -3,33 +3,30 @@ import { CartContext } from '../context/CartContext';
 import { UserContext } from '../context/UserContext';
 
 const Cart = () => {
-    const { cartItems, totalPrice } = useContext(CartContext);  // Obtener items del carrito y el precio total desde CartContext
-    const { token } = useContext(UserContext);  // Obtener el token desde el UserContext
+    const { cartItems, totalPrice, increaseQuantity, decreaseQuantity, removeFromCart } = useContext(CartContext);
+    const { token } = useContext(UserContext);
 
     return (
         <div className="container mt-5">
             <h2>Carrito de Compras</h2>
             <ul className="list-group">
-                {cartItems.length === 0 ? (
-                    <li className="list-group-item">El carrito está vacío</li>
-                ) : (
-                    cartItems.map((pizza) => (
-                        <li className="list-group-item d-flex align-items-center" key={pizza.id}>
+                {cartItems.map((pizza) => (
+                    <li className="list-group-item d-flex justify-content-between align-items-center" key={pizza.id}>
+                        <div className="d-flex align-items-center">
                             <img src={pizza.img} alt={pizza.name} style={{ width: '50px', marginRight: '10px' }} />
-                            <span>{pizza.name}</span> 
-                            <span className="ms-auto">{pizza.price.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })} x {pizza.quantity}</span>
-                        </li>
-                    ))
-                )}
+                            <span>{pizza.name} - {pizza.price.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</span>
+                        </div>
+                        <div>
+                            <button className="btn btn-secondary btn-sm" onClick={() => decreaseQuantity(pizza.id)}>-</button>
+                            <span className="mx-2">{pizza.quantity}</span>
+                            <button className="btn btn-secondary btn-sm" onClick={() => increaseQuantity(pizza.id)}>+</button>
+                            <button className="btn btn-danger btn-sm ms-2" onClick={() => removeFromCart(pizza.id)}>Eliminar</button>
+                        </div>
+                    </li>
+                ))}
             </ul>
             <h3 className="mt-3">Total: {totalPrice.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })}</h3>
-            <button 
-                className="btn btn-primary mt-3" 
-                disabled={!token}  // Deshabilitar el botón "Pagar" si no hay token
-            >
-                Pagar
-            </button>
-            {!token && <p className="text-danger mt-2">Debes estar logueado para realizar el pago.</p>} {/* Mostrar mensaje si no hay token */}
+            <button className="btn btn-primary mt-3" disabled={!token}>Pagar</button> {/* Deshabilitar el botón si no hay token */}
         </div>
     );
 };
